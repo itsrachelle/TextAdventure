@@ -1,3 +1,5 @@
+
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
@@ -225,6 +227,7 @@ public class Servers extends Thread {
 				}
 
 				processMessage();
+				
 				token.release();
 
 				
@@ -320,6 +323,7 @@ public class Servers extends Thread {
 						+ "\n---------------------------\n");
 			} catch (IOException e) {
 				System.err.println("A player's connection has been lost!...Dropping them");
+				token.release();
 				close();
 				//e.printStackTrace();
 				//System.exit(-1);

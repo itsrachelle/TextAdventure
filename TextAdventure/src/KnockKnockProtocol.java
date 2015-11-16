@@ -1,10 +1,13 @@
 
+
 import java.net.*;
 import java.io.*;
 
+
+//Old protocol to be used for testing
 public class KnockKnockProtocol {
     private static final int WAITING = 0;
-    private static final int SENTKNOCKKNOCK = 1;
+    private static final int SENTSOMETHING = 1;
     private static final int SENTCLUE = 2;
     private static final int ANOTHER = 3;
 
@@ -28,8 +31,10 @@ public class KnockKnockProtocol {
 
         if (state == WAITING) {
             theOutput = "Knock! Knock!";
-            state = SENTKNOCKKNOCK;
-        } else if (state == SENTKNOCKKNOCK) {
+            state = SENTSOMETHING;
+        } else if (state == SENTSOMETHING) {
+        	
+        	
             if (theInput.equalsIgnoreCase("Who's there?") || theInput.equalsIgnoreCase("Whos there?")) {
                 theOutput = clues[currentJoke];
                
@@ -63,7 +68,7 @@ public class KnockKnockProtocol {
                     currentJoke = 0;
                 else
                     currentJoke++;
-                state = SENTKNOCKKNOCK;
+                state = SENTSOMETHING;
             } else {
                 theOutput = "Bye.";
                 state = WAITING;

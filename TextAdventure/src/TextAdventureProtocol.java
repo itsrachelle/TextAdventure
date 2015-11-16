@@ -3,15 +3,16 @@
 import java.net.*;
 import java.io.*;
 
+//Will be based of TextAdventure's behavior and processing
 public class TextAdventureProtocol {
-    private static final int WAITING = 0;
-    private static final int SENTSOMETHING = 1;
+    private static final int STARTINTRO = 0;
+    private static final int STARTEDADVENTURE = 1;
     private static final int SENTCLUE = 2;
-    private static final int ANOTHER = 3;
+    private static final int DEATHSENT = 3;
 
     private static final int NUMJOKES = 5;
 
-    private int state = WAITING;
+    private int state = STARTINTRO;
     private int currentJoke = 0;
     
     
@@ -27,17 +28,17 @@ public class TextAdventureProtocol {
         String theOutput = null;
 
 
-        if (state == WAITING) {
+        if (state == STARTINTRO) {
             theOutput = "Knock! Knock!";
-            state = SENTSOMETHING;
-        } else if (state == SENTSOMETHING) {
+            state = STARTEDADVENTURE;
+        } else if (state == STARTEDADVENTURE) {
         	
         	
             if (theInput.equalsIgnoreCase("Who's there?") || theInput.equalsIgnoreCase("Whos there?")) {
                 theOutput = clues[currentJoke];
                
                 theOutput = answers[currentJoke] + " Want another? (y/n)";
-                state = ANOTHER;
+                state = DEATHSENT;
                 
                 
                 //state = SENTCLUE;
@@ -58,7 +59,7 @@ public class TextAdventureProtocol {
 //                state = SENTKNOCKKNOCK;
 //            }
 //        } 
-            else if (state == ANOTHER) {
+            else if (state == DEATHSENT) {
             if (theInput.equalsIgnoreCase("y")) {
 
                 theOutput = "Knock! Knock!";
@@ -66,10 +67,10 @@ public class TextAdventureProtocol {
                     currentJoke = 0;
                 else
                     currentJoke++;
-                state = SENTSOMETHING;
+                state = STARTEDADVENTURE;
             } else {
                 theOutput = "Bye.";
-                state = WAITING;
+                state = STARTINTRO;
             }
         }
         return theOutput;
