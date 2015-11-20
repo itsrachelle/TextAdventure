@@ -3,4 +3,5 @@ A|Welcome to A|B;
 B|Welcome to B|C;
 C|Welcome to C|D;
 D|Welcome to D|E;
-E|You've reached E, end of advenure|Z;
+E|You've reached E, end of adventure|Z;
+Z|Thank you for playing, Champion. Go forth and be awesome!|;

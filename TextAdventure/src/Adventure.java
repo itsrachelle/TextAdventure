@@ -115,7 +115,7 @@ public class Adventure {
 		// Iterate over value of scene key, display choices to user
 		// display the string
 		ArrayList<String> currentSceneKeys = getSceneKeys(currentChoice, currentScene);
-		String nextChoices = AdventureMain.getChoicesWithFormating(currentChoice,currentSceneKeys);
+		String nextChoices = AdventureMain.getChoicesWithFormating(currentSceneKeys);
 		
 		return nextChoices;
 	}
@@ -127,7 +127,6 @@ public class Adventure {
 		String outChoice = "";
 		
 		// there is only one
-		System.out.println("currentChoice "+ currentChoice);
 		for (String scene : getTheAdventure().get(currentChoice).keySet()) {
 			outChoice = scene;
 		}
@@ -166,7 +165,7 @@ public class Adventure {
 			// display the string
 			ArrayList<String> currentSceneKeys = myAdventure.get(currentChoice).get(currentScene);
 			// placeholder
-			String nextChoices = AdventureMain.getChoicesWithFormating("",currentSceneKeys);
+			String nextChoices = AdventureMain.getChoicesWithFormating(currentSceneKeys);
 			System.out.println(nextChoices);
 			
 			// get player choice

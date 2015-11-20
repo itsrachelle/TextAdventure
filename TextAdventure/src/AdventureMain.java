@@ -157,11 +157,11 @@ public class AdventureMain {
 		return buffer.toString();
 	}
 	
-	public static String getChoicesWithFormating(String currentChoice, ArrayList<String> choices) {
+	public static String getChoicesWithFormating(ArrayList<String> choices) {
 		
 		StringBuffer buffer = new StringBuffer();
 		
-		buffer.append("\ncurrentChoice: \n\n");
+		buffer.append("\nOur Hero's current choices are: \n\n");
 		
 		for (String choice : choices){
 			
@@ -179,33 +179,23 @@ public class AdventureMain {
 			// not this method inside there now
 			Adventure adventure = new Adventure(getAdventureChoiceFromUserInput(getValidAdventures()));
 			
-			//HashMap<String, HashMap<String, ArrayList<String>>> start = adventure.getTheAdventure();
-			
-			// these 2 string start it
-			String firstKey = adventure.getFirstSceneKey();
-			System.out.println("First Scene key is: " + firstKey);
-			// should be 2 methods 1 for choice and 1 for scene
-			String currentChoice = adventure.getNextChoice(firstKey);
-			String currentScene = adventure.getCurrentScene(firstKey);
+			String currentChoice = adventure.getFirstSceneKey();
+			String currentScene = adventure.getCurrentScene(currentChoice);
+			ArrayList<String> currentSceneKeys = adventure.getSceneKeys(currentChoice, currentScene);
 			
 			
-			ArrayList<String> currentSceneKeys = adventure.getSceneKeys(firstKey, currentScene);
-			System.out.println(getChoicesWithFormating(currentChoice, currentSceneKeys));
-//			choice = getNextSceneChoiceFromUserInput(currentSceneKeys);
 			
 			// the client sending/receiving stuff would have to go here
 			while(!currentChoice.contains("Z")) {
 				
+				System.out.println(getChoicesWithFormating(currentSceneKeys));
+				
 				currentChoice = getNextSceneChoiceFromUserInput(currentSceneKeys);
+				currentScene = adventure.getCurrentScene(currentChoice);
+				currentSceneKeys = adventure.getSceneKeys(currentChoice, currentScene);	
 				
-				currentSceneKeys = adventure.getSceneKeys(currentChoice, currentScene);
-				
-				
+				System.out.println(currentScene);
 			}
-			
-			
-			
-			//adventure.playAdventure();
 
 		} else if (!checkArgsLen(args)) {
 			printArgs(args);
