@@ -157,11 +157,11 @@ public class AdventureMain {
 		return buffer.toString();
 	}
 	
-	public static String getChoicesWithFormating(ArrayList<String> choices) {
+	public static String getChoicesWithFormating(String currentChoice, ArrayList<String> choices) {
 		
 		StringBuffer buffer = new StringBuffer();
 		
-		buffer.append("\nPlease enter one of the corresponding letters for where you would like to go next: \n\n");
+		buffer.append("\ncurrentChoice: \n\n");
 		
 		for (String choice : choices){
 			
@@ -175,8 +175,37 @@ public class AdventureMain {
 
 		if (checkArgsLen(args)) {
 			// call adventure
+			// we need these messages to go to the client... so their response would go into the constructor
+			// not this method inside there now
 			Adventure adventure = new Adventure(getAdventureChoiceFromUserInput(getValidAdventures()));
-			adventure.playAdventure();
+			
+			//HashMap<String, HashMap<String, ArrayList<String>>> start = adventure.getTheAdventure();
+			
+			// these 2 string start it
+			String firstKey = adventure.getFirstSceneKey();
+			System.out.println("First Scene key is: " + firstKey);
+			// should be 2 methods 1 for choice and 1 for scene
+			String currentChoice = adventure.getNextChoice(firstKey);
+			String currentScene = adventure.getCurrentScene(firstKey);
+			
+			
+			ArrayList<String> currentSceneKeys = adventure.getSceneKeys(firstKey, currentScene);
+			System.out.println(getChoicesWithFormating(currentChoice, currentSceneKeys));
+//			choice = getNextSceneChoiceFromUserInput(currentSceneKeys);
+			
+			// the client sending/receiving stuff would have to go here
+			while(!currentChoice.contains("Z")) {
+				
+				currentChoice = getNextSceneChoiceFromUserInput(currentSceneKeys);
+				
+				currentSceneKeys = adventure.getSceneKeys(currentChoice, currentScene);
+				
+				
+			}
+			
+			
+			
+			//adventure.playAdventure();
 
 		} else if (!checkArgsLen(args)) {
 			printArgs(args);

@@ -20,7 +20,7 @@ public class Adventure {
 		return choice;
 	}
 
-	private HashMap<String, HashMap<String, ArrayList<String>>> getTheAdventure() {
+	public HashMap<String, HashMap<String, ArrayList<String>>> getTheAdventure() {
 		return theAdventure;
 	}
 
@@ -88,9 +88,60 @@ public class Adventure {
 
 		return builtAdventure;
 	}
+	
+	// begin adventure
+	public String getFirstSceneKey() {
+		
+		String firstScene = "";
+		for (String scene : getTheAdventure().keySet()) {
+//			System.out.println("Scene is: " +scene);
+			
+			if (scene.equals("S")) {
+				firstScene = scene;
+			}
+			
+		}
+		return firstScene;
+	}
+	
+	public String getNextChoice(String currentChoice) {
+		
+		String currentScene = "";
+		
+		for (String scene : getTheAdventure().get(currentChoice).keySet()) {
+			currentScene = scene;
+		}
+
+		// Iterate over value of scene key, display choices to user
+		// display the string
+		ArrayList<String> currentSceneKeys = getSceneKeys(currentChoice, currentScene);
+		String nextChoices = AdventureMain.getChoicesWithFormating(currentChoice,currentSceneKeys);
+		
+		return nextChoices;
+	}
+	
+	// process adventure scene
+	
+	public String getCurrentScene(String currentChoice) {
+		
+		String outChoice = "";
+		
+		// there is only one
+		System.out.println("currentChoice "+ currentChoice);
+		for (String scene : getTheAdventure().get(currentChoice).keySet()) {
+			outChoice = scene;
+		}
+		
+		return outChoice;
+	}
+	public ArrayList<String> getSceneKeys(String currentChoice, String currentScene) {
+		
+		return getTheAdventure().get(currentChoice).get(currentScene);
+	}
+	
 
 	public void playAdventure() {
-
+		// this is for testing to show the flow of the adventure. do not call this in server.
 		HashMap<String, HashMap<String, ArrayList<String>>> myAdventure = getTheAdventure();
 
 		Set<String> choices = myAdventure.keySet();
@@ -114,7 +165,8 @@ public class Adventure {
 			// Iterate over value of scene key, display choices to user
 			// display the string
 			ArrayList<String> currentSceneKeys = myAdventure.get(currentChoice).get(currentScene);
-			String nextChoices = AdventureMain.getChoicesWithFormating(currentSceneKeys);
+			// placeholder
+			String nextChoices = AdventureMain.getChoicesWithFormating("",currentSceneKeys);
 			System.out.println(nextChoices);
 			
 			// get player choice
