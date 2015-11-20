@@ -19,7 +19,7 @@ public class KnockKnockProtocol {
     
 
     private String[] clues = { "Turnip", "Little Old Lady", "Atch", "Who", "Who" };
-    private String[] answers = { "Turnip the heat, it's cold in here!",
+    private String[] answers = { "Turnip the heat, it's cold in here!|A;B;C;D",
                                  "I didn't know you could yodel!",
                                  "Bless you!",
                                  "Is there an owl in here?",
@@ -30,7 +30,7 @@ public class KnockKnockProtocol {
 
 
         if (state == WAITING) {
-            theOutput = "Knock! Knock!";
+            theOutput = "From protocol: Knock! Knock! |A;B;C;D";
             state = SENTSOMETHING;
         } else if (state == SENTSOMETHING) {
         	

@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -9,16 +10,17 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 
 public class Client {
 
-	ArrayList<String> optionList = null;
+	static ArrayList<String> decisionsList = null;
 	String intialScene = "";
-	BufferedReader input;
-	PrintWriter output;
+	static BufferedReader input;
+	static PrintWriter output;
 	Socket clientSock;
 
 	public Client(String hostNameIn, int portNumIn) {
@@ -26,14 +28,15 @@ public class Client {
 		// grab i/o streams
 		// wait for response (send/receive)
 
-		optionList = new ArrayList<String>();
-		//InetAddress loopback = null;
-		//int portNumIn = 1010;
+		decisionsList = new ArrayList<String>();
+		// InetAddress loopback = null;
+		// int portNumIn = 1010;
 		try {
+
 			clientSock = new Socket(hostNameIn, portNumIn);
-			output = new PrintWriter(clientSock.getOutputStream());
+			output = new PrintWriter(clientSock.getOutputStream(), true);
 			input = new BufferedReader(new InputStreamReader(clientSock.getInputStream()));
-			this.receive();
+
 		} catch (UnknownHostException e) {
 			System.err.println("Don't know about host " + hostNameIn);
 			System.exit(1);
@@ -55,52 +58,83 @@ public class Client {
 		int portNumber = Integer.parseInt(args[1]);
 
 		new Client(hostName, portNumber);
+
+		receive();
 	}
 
-	private void send(String choice) {
-		output.write(choice);
+	private static void send(String choice) {
+		System.out.println();
+		System.out.print("Client:" + choice);
+		output.println(choice);
 	}
 
-	private void receive() {
-		try {
-			StringBuffer buffer = new StringBuffer();
-			CharBuffer cbuf = null;
-
-			//need to check for ending character
-			//(based of code from KnockKnockClient):
-			
-/*			if (lineFromServer.contains("Bye")) {
-				
-				break;
-				
-			}*/
-			input.read(cbuf);
-			buffer.append(cbuf);
-			int splitIndex = buffer.toString().lastIndexOf("|");
-			String decisions = buffer.toString().substring(splitIndex, buffer.toString().length());
-			String[] options = decisions.split(";");
-			for (String arg : options) {
-				optionList.add(arg);
-			}
-			decision(buffer);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void decision(StringBuffer buffer) {
-		BufferedReader stdInput = new BufferedReader(new InputStreamReader(System.in));
-		String inputChoice = null;
-		while ((!(optionList.contains(inputChoice)) || (inputChoice == null))) {
-			System.out.println(buffer.toString());
+	static private void receive() {
+		//int x = 1;
+		//while (x == 1) {
 			try {
-				inputChoice = stdInput.readLine();
+
+
+				String inputLine;
+				while ((inputLine = input.readLine()) != null) {
+
+					if (inputLine.contains("Bye")) {
+						//x = 0;
+						break;
+					}
+					
+					// index of options
+					Integer textTotheRightOfBar = inputLine.lastIndexOf("|") +1;
+
+					// Decision all in one string, seperated by a semicolon (org
+					// implememtation)
+					String decisionsWithSemiColons = inputLine.substring(textTotheRightOfBar, 
+							inputLine.length());
+
+
+					// Gives array of options as strings
+					String[] decisionsFormatted = decisionsWithSemiColons.split(";");
+					System.out.println("From server options: ");
+					for (String decision : decisionsFormatted) {
+						
+						System.out.println(decision);
+						decisionsList.add(decision);
+
+					}
+					
+					processInput();
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
+				System.exit(-1);
 			}
+		//}
+	}
+
+	static private void processInput() {
+
+		BufferedReader stdInput = new BufferedReader(new InputStreamReader(System.in));
+		 
+
+		try {
+			String inputChoice;
+			if (( inputChoice = stdInput.readLine()) != null) {
+				
+				
+				System.out.println(decisionsList);
+
+				if (decisionsList.contains(inputChoice)){
+					
+					send(inputChoice);
+					
+				}
+
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(-1);
 		}
-		send(inputChoice);
+		
 
 	}
 

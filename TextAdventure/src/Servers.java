@@ -246,12 +246,18 @@ public class Servers extends Thread {
 			String inputLine;
 			String outputLine;
 			
-			CoreyProtocol kkp = new CoreyProtocol();
+			//TODO
+			//Change to create new Adventure Main and recieve the strings sent
+			KnockKnockProtocol kkp = new KnockKnockProtocol();
 			//No client input to pass
 			//Passing null tells the protocol that
 			//we want the welcome message
+			
+			//TODO
+			//recieve line from Adventure Main and print to the client
 			outputLine = kkp.processInput(null);
 			output.println(outputLine);
+			
 			
 
 			
