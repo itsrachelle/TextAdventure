@@ -75,10 +75,11 @@ public class AdventureMain {
 		return out;
 	}
 
-	private static HashMap<String, String> getValidAdventures(String adventureFile) {
+	private static HashMap<String, String> getValidAdventures() {
 
 		HashMap<String, String> validAdventures = new HashMap<String, String>();
-		String inputadventure = readFile(adventureFile);
+		String adventures = addPathToFileName("Adventures.txt");
+		String inputadventure = readFile(adventures);
 		try {
 			// buffer for file in
 			BufferedReader input = new BufferedReader(new StringReader(inputadventure));
@@ -137,7 +138,7 @@ public class AdventureMain {
 
 	private static boolean checkArgsLen(String[] myArgs) {
 
-		if (!(myArgs.length == 1)) {
+		if (!(myArgs.length >= 0)) {
 			System.out.println("you need to pass in the Adventures.txt");
 			return false;
 		} else
@@ -149,8 +150,8 @@ public class AdventureMain {
 		// store files in 1 above src and this should work...on windows..
 		StringBuffer buffer = new StringBuffer();
 		
-		buffer.append("..");
-		buffer.append("\\");
+		//buffer.append("..");
+		buffer.append("src/adventures/");
 		buffer.append(fileName);
 		
 		return buffer.toString();
@@ -174,7 +175,7 @@ public class AdventureMain {
 
 		if (checkArgsLen(args)) {
 			// call adventure
-			Adventure adventure = new Adventure(getAdventureChoiceFromUserInput(getValidAdventures(args[0])));
+			Adventure adventure = new Adventure(getAdventureChoiceFromUserInput(getValidAdventures()));
 			adventure.playAdventure();
 
 		} else if (!checkArgsLen(args)) {
