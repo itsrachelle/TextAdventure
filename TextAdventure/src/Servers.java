@@ -1,5 +1,4 @@
 
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
@@ -22,6 +21,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
+
 public class Servers extends Thread {
 
 	private ArrayList<SubServer> clientList;
@@ -29,7 +29,7 @@ public class Servers extends Thread {
     final public static int MAX_CLIENTS = 15;
    
     final private SubServer[] subServersForClients = new SubServer[ MAX_CLIENTS ];
-    public ConcurrentHashMap<Object,Socket> clients;
+    //public ConcurrentHashMap<Object,Socket> clients;
     
     
     Semaphore token;
@@ -52,6 +52,7 @@ public class Servers extends Thread {
     	
          this.masterServerSock = new ServerSocket( port );
          token = new Semaphore(2);
+         
          /*
           * Trying to figure out implementation to have a list of clients
           * to send them all messages
@@ -78,9 +79,6 @@ public class Servers extends Thread {
 				
 				//handle connection
 				connection = this.masterServerSock.accept();
-				
-
-				
 				
 				//sub server to handle clients
 				assignConnectionToSubServer( connection );
@@ -109,8 +107,8 @@ public class Servers extends Thread {
 				currentSubServer = new SubServer(connection, i, token);
 //				/*Trying to figure out implementation to have a list of clients
 //				 * to send them all messages
-				clients = new ConcurrentHashMap<Object,Socket>();
-				clients.put(connection.toString(), connection);
+//				clients = new ConcurrentHashMap<Object,Socket>();
+//				clients.put(connection.toString(), connection);
 
 				break;
 				
@@ -193,21 +191,6 @@ public class Servers extends Thread {
 				// e.printStackTrace();
 			}
 			this.token = semaIn;
-			
-			/*			
-			 * Trying to figure out implementation to have a list of clients
-			 * to send them all messages
-			try {
-				output = new PrintWriter(clientConnection.getOutputStream(), true);
-			} catch (IOException e) {
-				System.err.println("A player's connection has been lost!");
-				// e.printStackTrace();
-			}
-			
-			*
-			*/
-			
-			
 			start();
         }
 
@@ -227,7 +210,6 @@ public class Servers extends Thread {
 				}
 
 				processMessage();
-				
 				token.release();
 
 				
@@ -259,46 +241,36 @@ public class Servers extends Thread {
 			 * current state.
 			 * 
 			 */
+			
+			//Welcome being sent
 			String inputLine;
 			String outputLine;
-			KnockKnockProtocol kkp = new KnockKnockProtocol();
+			
+			CoreyProtocol kkp = new CoreyProtocol();
+			//No client input to pass
+			//Passing null tells the protocol that
+			//we want the welcome message
 			outputLine = kkp.processInput(null);
 			output.println(outputLine);
 			
 
 			
-			// while loop initiates when client replies
+			// While loop initiates when client replies
 			try {
-				
 
-				
-				String fileName = "responses.txt";
-				PrintWriter file = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)));
+				//File to write responses in (for multiclient implementation)
+				//String fileName = "responses.txt";
+				//PrintWriter file = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)));
 				
 				BufferedReader reader = new BufferedReader(new InputStreamReader(clientConnection.getInputStream()));
 
-
-				
 				while ((inputLine = reader.readLine()) != null) {
-					
-//					//file.println(inputLine);
-//
-					
+
 					outputLine = kkp.processInput(inputLine);
 
-					
 					output.println(outputLine);
 				
 					//output.println(inputLine);
-
-					//Trying to figure out implementation to have a list of clients
-					//to send them all messages:
-					
-					//send("testing");
-					
-					
-					//System.out.println("Written in file:   "+inputLine);
-
 
 					//Timer placeholder (future implementation)
 
@@ -306,17 +278,9 @@ public class Servers extends Thread {
 					// without saying anything
 					if (outputLine.equals("Bye.")){
 
-						file.flush();
-						file.close();
-
 						break;
 					}
 				}
-				
-				
-				
-
-
 				
 			} catch (SocketTimeoutException ste) {
 				System.err.println("A player is taking too long! \n" + "\n....\n" + " \nPlayer has been TERMINATED"
@@ -330,11 +294,7 @@ public class Servers extends Thread {
 			} 
         }
 
-
-        
-        /**
-         * terminates the connection with this client (i.e. stops serving him)
-         */
+         //terminates the connection with this client (i.e. stops serving him)
         public void close() {
             try {
                  this.clientConnection.close();
@@ -347,34 +307,6 @@ public class Servers extends Thread {
     }
     
     
-    /*
-     * 
-     * Trying to figure out implementation to have a list of clients
-	 * to send them all messages
-	 * 
-	 * */
-//	public void send(String msg) {
-//		
-//		for (SubServer client: clientList){
-//			
-//			client.output.write(msg);
-//			client.output.println(msg);
-//			//client.output.flush();
-//		}
-		
-		
 
-//		Iterator<Object> it = clients.keySet().iterator();
-//
-//		while (it.hasNext()) {
-//			try {
-//
-//				PrintStream output = new PrintStream(clients.get(it.next()).getOutputStream(), true);
-//				System.out.println("Supposed to go through clients");
-//				output.println(msg);
-//			} catch (IOException e) {
-//			}
-//		}
-//	}
 
 }

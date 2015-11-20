@@ -20,21 +20,34 @@ public class CoreyProtocol {
 	private HashMap<String, String> curAdventure;
 	private String curTile = "S";
 
-	public CoreyProtocol(){
-       Charset charset = Charset.forName("US-ASCII");
-       adventures = new HashMap<String, String>();
-       curAdventure = new HashMap<String, String>();
-       try (BufferedReader reader = Files.newBufferedReader(Paths.get("Adventures.txt"), charset)) {
-          String line = null;
-          while ((line = reader.readLine()) != null) {
-             //Populate adventures map
-             String[] key_value = line.split("|");
-             adventures.put(key_value[0], key_value[1]);
-          }
-       } catch (IOException x) {
-          System.err.format("IOException: %s%n", x);
-       }
-    }
+	public CoreyProtocol() {
+		
+		Charset charset = Charset.forName("US-ASCII");
+		
+		adventures = new HashMap<String, String>();
+		curAdventure = new HashMap<String, String>();
+		
+		//opens adventure file that contains name of corresponding adventure name
+		try (BufferedReader reader = Files.newBufferedReader(Paths.get("Adventure.txt"), charset)) {
+			
+			String line = null;
+			
+			while ((line = reader.readLine()) != null) {
+				
+				// Populate adventures map
+				String[] key_value = line.split("|");
+				adventures.put(key_value[0], key_value[1]);
+				
+				//Key is 
+				System.out.println("KEY VALUE IS: "+key_value[0]);
+				
+			}
+			
+		} catch (IOException x) {
+			System.err.format("IOException: %s%n", x);
+		}
+		
+	}
 
 	public void setAdventure(String index) {
 		String path = adventures.get(index) + ".txt";
