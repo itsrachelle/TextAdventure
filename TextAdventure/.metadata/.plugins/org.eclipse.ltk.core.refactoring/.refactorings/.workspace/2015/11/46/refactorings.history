@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">&#x0A;<refactoring comment="Delete 10 resources" deleteContents="false" description="Delete 10 resources" element1="/Bluecat" element10="/TextAdventure" element2="/chatroom" element3="/ex" element4="/HomeworkFour" element5="/HomeworkHelp" element6="/HostResolve" element7="/InputProgram" element8="/NetInfo" element9="/SendAll" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="10" stamp="1447176780057"/>&#x0A;<refactoring comment="Delete resource &apos;HostResolve&apos;" deleteContents="false" description="Delete resource &apos;HostResolve&apos;" element1="/HostResolve" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1447352001811"/>
-</session>
