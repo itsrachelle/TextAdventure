@@ -17,125 +17,117 @@ import java.util.ArrayList;
 
 public class Client {
 
-	static ArrayList<String> decisionsList = null;
-	String intialScene = "";
-	static BufferedReader input;
-	static PrintWriter output;
-	Socket clientSock;
+    static ArrayList<String> decisionsList = null;
+    String intialScene = "";
+    static BufferedReader input;
+    static PrintWriter output;
+    Socket clientSock;
+    static String currentScene = "";
 
-	public Client(String hostNameIn, int portNumIn) {
-		// connects to server
-		// grab i/o streams
-		// wait for response (send/receive)
+    public Client(String hostNameIn, int portNumIn) {
+        // connects to server
+        // grab i/o streams
+        // wait for response (send/receive)
 
-		decisionsList = new ArrayList<String>();
-		// InetAddress loopback = null;
-		// int portNumIn = 1010;
-		try {
+        decisionsList = new ArrayList<String>();
+        
+        try {
 
-			clientSock = new Socket(hostNameIn, portNumIn);
-			output = new PrintWriter(clientSock.getOutputStream(), true);
-			input = new BufferedReader(new InputStreamReader(clientSock.getInputStream()));
+            clientSock = new Socket(hostNameIn, portNumIn);
+            output = new PrintWriter(clientSock.getOutputStream(), true);
+            input = new BufferedReader(new InputStreamReader(clientSock.getInputStream()));
 
-		} catch (UnknownHostException e) {
-			System.err.println("Don't know about host " + hostNameIn);
-			System.exit(1);
-		} catch (IOException e) {
-			System.err.println("Couldn't get I/O for the connection to " + hostNameIn);
-			System.exit(1);
-		}
+        } catch (UnknownHostException e) {
+            System.err.println("Don't know about host " + hostNameIn);
+            System.exit(1);
+        } catch (IOException e) {
+            System.err.println("Couldn't get I/O for the connection to " + hostNameIn);
+            System.exit(1);
+        }
 
-	}
+    }
 
-	public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {
 
-		if (args.length != 2) {
-			System.err.println("Usage: java EchoClient <host name> <port number>");
-			System.exit(1);
-		}
+        if (args.length != 2) {
+            System.err.println("Usage: java EchoClient <host name> <port number>");
+            System.exit(1);
+        }
 
-		String hostName = args[0];
-		int portNumber = Integer.parseInt(args[1]);
+        String hostName = args[0];
+        int portNumber = Integer.parseInt(args[1]);
 
-		new Client(hostName, portNumber);
+        new Client(hostName, portNumber);
+        String clientAdventureChoice = AdventureMain.getAdventureChoiceFromUserInput(AdventureMain.getValidAdventures());
+        output.print(clientAdventureChoice);
+        receive();
+    }
 
-		receive();
-	}
+    private static void send(String choice) {
+        output.println(choice);
+    }
 
-	private static void send(String choice) {
-		System.out.println();
-		System.out.print("Client:" + choice);
-		output.println(choice);
-	}
+    static private void receive() {
+        try {
+        
+            String inputLine;
+            while ((inputLine = input.readLine()) != null) {
+                if (inputLine.charAt(0) == 'Z') {
+                    System.out.print("End of adventure");
+                    break;
+                }
+                
+                // index of options
+                Integer textToTheRightOfBar = inputLine.lastIndexOf("|") + 1;
 
-	static private void receive() {
-		//int x = 1;
-		//while (x == 1) {
-			try {
+                currentScene = inputLine.substring(0,textToTheRightOfBar-2);
+                // Decision all in one string, seperated by a semicolon (org
+                // implememtation)
+                String decisionsWithSemiColons = inputLine.substring(textToTheRightOfBar,
+                        inputLine.length());
 
+                // Gives array of options as strings
+                String[] decisionsFormatted = decisionsWithSemiColons.split(";");
+                
+                System.out.println("From server options: ");
+                for (String decision : decisionsFormatted) {
+                    System.out.println(decision);
+                    decisionsList.add(decision);
 
-				String inputLine;
-				while ((inputLine = input.readLine()) != null) {
+                }
 
-					if (inputLine.contains("Bye")) {
-						//x = 0;
-						break;
-					}
-					
-					// index of options
-					Integer textTotheRightOfBar = inputLine.lastIndexOf("|") +1;
+                processInput();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+        //}
+    }
 
-					// Decision all in one string, seperated by a semicolon (org
-					// implememtation)
-					String decisionsWithSemiColons = inputLine.substring(textTotheRightOfBar, 
-							inputLine.length());
+    static private void processInput() {
 
+        BufferedReader stdInput = new BufferedReader(new InputStreamReader(System.in));
 
-					// Gives array of options as strings
-					String[] decisionsFormatted = decisionsWithSemiColons.split(";");
-					System.out.println("From server options: ");
-					for (String decision : decisionsFormatted) {
-						
-						System.out.println(decision);
-						decisionsList.add(decision);
+        try {
+            String inputChoice = null;
+            while (!(decisionsList.contains(inputChoice))) {
+                if ((inputChoice = stdInput.readLine()) != null) {
+                    System.out.println(currentScene);
+                    System.out.println(AdventureMain.getChoicesWithFormating(decisionsList));
 
-					}
-					
-					processInput();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.exit(-1);
-			}
-		//}
-	}
+                    if (decisionsList.contains(inputChoice)) {
+                        
+                        send(inputChoice);
+                    }
+                }
+            }
 
-	static private void processInput() {
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
 
-		BufferedReader stdInput = new BufferedReader(new InputStreamReader(System.in));
-		 
-
-		try {
-			String inputChoice;
-			if (( inputChoice = stdInput.readLine()) != null) {
-				
-				
-				System.out.println(decisionsList);
-
-				if (decisionsList.contains(inputChoice)){
-					
-					send(inputChoice);
-					
-				}
-
-			}
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(-1);
-		}
-		
-
-	}
+    }
 
 }

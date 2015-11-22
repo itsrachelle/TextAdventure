@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class AdventureMain {
 
 	// get user input
-	private static String getAdventureChoiceFromUserInput(HashMap<String, String> validAdventures) {
+	public static String getAdventureChoiceFromUserInput(HashMap<String, String> validAdventures) {
 
 		String out = "";
 
@@ -75,7 +75,7 @@ public class AdventureMain {
 		return out;
 	}
 
-	private static HashMap<String, String> getValidAdventures() {
+	public static HashMap<String, String> getValidAdventures() {
 
 		HashMap<String, String> validAdventures = new HashMap<String, String>();
 		String adventures = addPathToFileName("Adventures.txt");
@@ -177,6 +177,9 @@ public class AdventureMain {
 			// call adventure
 			// we need these messages to go to the client... so their response would go into the constructor
 			// not this method inside there now
+			
+			// from client
+			// pass to adventure constructor fro client
 			Adventure adventure = new Adventure(getAdventureChoiceFromUserInput(getValidAdventures()));
 			
 			String currentChoice = adventure.getFirstSceneKey();
