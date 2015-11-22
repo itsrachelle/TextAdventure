@@ -45,6 +45,10 @@ public class AdventureGenerator {
 			 String out = randomPick(subject) + randomPick(predicate) + randomPick(object);
 			 System.out.println(out);
 		 }
-	
+		
 	}
+
+	}
+
+>>>>>>> 7ec83ddc67bde25331f711966edfd59b2d46c699
 }
