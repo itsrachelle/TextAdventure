@@ -21,7 +21,7 @@ public class Client {
     String intialScene = "";
     static BufferedReader input;
     static PrintWriter output;
-    Socket clientSock;
+    static Socket clientSock;
     static String currentScene = "";
 
     public Client(String hostNameIn, int portNumIn) {
@@ -75,6 +75,8 @@ public class Client {
             while ((inputLine = input.readLine()) != null) {
                 if (inputLine.charAt(0) == 'Z') {
                     System.out.print("End of adventure");
+                    // gracefully close if hit the end!
+                    clientSock.close();
                     break;
                 }
                 

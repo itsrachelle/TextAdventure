@@ -28,7 +28,6 @@ public class Servers extends Thread {
     private ArrayList<SubServer> clientList;
     final private ServerSocket masterServerSock;
     final public static int MAX_CLIENTS = 15;
-    static String sendSceneAndKeysToClient = "";
 
     final private SubServer[] subServersForClients = new SubServer[MAX_CLIENTS];
     //public ConcurrentHashMap<Object,Socket> clients;
@@ -235,7 +234,7 @@ public class Servers extends Thread {
             currentScene = adventure.getCurrentScene(currentChoice);
             ArrayList<String> currentSceneKeys = adventure.getSceneKeys(currentChoice, currentScene);
 
-            sendSceneAndKeysToClient = formatClientKeys(currentSceneKeys);
+            String sendSceneAndKeysToClient = formatClientKeys(currentSceneKeys);
             output.println(sendSceneAndKeysToClient);
 
             // the client sending/receiving stuff would have to go here
@@ -311,6 +310,7 @@ public class Servers extends Thread {
         }
 
         private String formatClientKeys(ArrayList<String> currentSceneKeys) {
+        	String sendSceneAndKeysToClient = "";
             for (String key : currentSceneKeys) {
                 sendSceneAndKeysToClient = sendSceneAndKeysToClient + key + ";";
             }
