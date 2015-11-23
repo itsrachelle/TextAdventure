@@ -28,7 +28,7 @@ public class AdventureGenerator {
 		return complements;
 	}
 	
-	private static String randomPick(ArrayList<String> choices) {
+	static String randomPick(ArrayList<String> choices) {
 		Random randomGenerator = new Random();
 		int choice = randomGenerator.nextInt(choices.size());
 		return choices.get(choice);

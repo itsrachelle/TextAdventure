@@ -74,8 +74,9 @@ public class Servers extends Thread {
                 //sub server to handle clients
                 assignConnectionToSubServer(connection);
 
-                //print out information
+                //print out information about client's connection
                 System.out.println(connection.toString());
+                
             } catch (IOException e) {
 
                 System.err.println("Failed to connect to client ");
@@ -115,7 +116,7 @@ public class Servers extends Thread {
 
         final private int clientId;
         final private Socket clientConnection;
-        private OutputStream output;
+        //private OutputStream output;
         private Semaphore token;
         private final BlockingQueue<String> queue;
 
@@ -127,12 +128,12 @@ public class Servers extends Thread {
             this.clientId = id;
             this.clientConnection = connection;
             queue = q;
-            try {
-                output = clientConnection.getOutputStream();
-            } catch (IOException e) {
-                System.err.println("A player's connection has been lost!");
-                // e.printStackTrace();
-            }
+//            try {
+//                output = clientConnection.getOutputStream();
+//            } catch (IOException e) {
+//                System.err.println("A player's connection has been lost!");
+//                // e.printStackTrace();
+//            }
             this.token = semaIn;
             start();
         }
@@ -155,7 +156,7 @@ public class Servers extends Thread {
                 try {
 					processMessage();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+					 System.err.println("InterruptedException: "+e.getMessage());
 					e.printStackTrace();
 				}
                 token.release();
@@ -169,13 +170,13 @@ public class Servers extends Thread {
         public void processMessage() throws InterruptedException {
             PrintWriter output = null;
             BufferedReader input = null;
-            
+            String logFile = "loggedInputOutput.txt";
             
             try {
                 input = new BufferedReader(new InputStreamReader(clientConnection.getInputStream()));
                 output = new PrintWriter(clientConnection.getOutputStream(), true);
             }catch(SocketException socketException){
-				
+            	 System.err.println("Socket Exception");
 				close();
 				
 			} catch (IOException e1) {
@@ -185,9 +186,13 @@ public class Servers extends Thread {
             }
             String adventureChoice = "";
             try {
+            	
                 adventureChoice = input.readLine();
+                InputOutputLogger.logToFile(logFile, 
+                		"FROM CLIENT: Client has selected the follwing adventure choice: \n"+ adventureChoice);
+          
             } catch(SocketException socketException){
-				
+            	System.err.println("A player has exited the game");
 				close();
 				
 			}catch (IOException ex) {
@@ -202,8 +207,12 @@ public class Servers extends Thread {
             ArrayList<String> currentSceneKeys = adventure.getSceneKeys(currentChoice, currentScene);
 
             String sendSceneAndKeysToClient = formatClientKeys(currentSceneKeys);
+            
             output.println(sendSceneAndKeysToClient);
-
+            InputOutputLogger.logToFile(logFile,
+            		"FROM SERVER: Sent to client the following scene and keys: \n"+sendSceneAndKeysToClient);
+            
+            
             // the client sending/receiving stuff would have to go here
             while (!currentChoice.contains("Z")) {
 
@@ -213,7 +222,11 @@ public class Servers extends Thread {
                 	String check =null;
                 	try{
                 	if ((check = input.readLine())!=null){
+                		
                 		currentChoice = check;
+                		InputOutputLogger.logToFile(logFile,
+                				"FROM CLIENT: Client chose:\n"+ currentChoice);
+                		
                 	}
                 	}catch(SocketException socketException){
     					
@@ -224,14 +237,21 @@ public class Servers extends Thread {
 
                     	//Thread is the main thread
                     	int num_clients = Servers.num_clients;
-                    	System.out.println(clientId);
+                    	
+                    	//Will always print 0
+                    	//System.out.println(clientId);
+                    	
+                    	
                     	//String choiceArray[] = new String[num_clients];
                     	HashMap<String, Integer> choices = new HashMap<String, Integer>();
                     	int max = 0;
                     	String win = "A";
                     	for(int i = 0; i < num_clients-1; ++i){
                     		String choice = queue.take();
-                    		System.out.println(choice);
+                    		
+                    		System.out.println("Starting to list all client's choices");
+                    		System.out.println("Client: "+i+" Choice: " +choice);
+                    		
                     		Integer cnt = choices.get(choice);
                     		if(cnt == null)
                     			cnt = 0;
@@ -240,15 +260,21 @@ public class Servers extends Thread {
                     		if(cnt > max){
                     			max = cnt;
                     			win = choice;
+                    			
                     		}else if(cnt == max){
                     			win = "TIE";
                     		}
                     	}
-                    	System.out.println("WIN: "+win);
+                    	
                     	if(win.equals("TIE")){
+                    		
                     		currentChoice = AdventureGenerator.randomPick(new ArrayList<String>(choices.keySet()));
+                    		System.out.println("It was a tie and the randomly generated choice is: "+currentChoice);
+                    		
                     	}else{
+                    		
                     		currentChoice = win;
+                    		System.out.println("Choice was: "+currentChoice);
                     	}
                     	//I know this isn't ideal, but it should do for now
                     	for(int i = 0; i < num_clients-1; ++i){
@@ -258,7 +284,7 @@ public class Servers extends Thread {
                     		queue.notifyAll();
                     	}
                     }else{
-                    	System.out.println(clientId);
+                    	System.out.println("Current client ID: "+clientId);
                     	queue.add(currentChoice);
                     	synchronized(queue){
                     		queue.wait();
@@ -269,7 +295,11 @@ public class Servers extends Thread {
                     currentSceneKeys = adventure.getSceneKeys(currentChoice, currentScene);
                     
                     sendSceneAndKeysToClient = formatClientKeys(currentSceneKeys);
+                    
                     output.println(sendSceneAndKeysToClient);
+                    InputOutputLogger.logToFile(logFile,
+                    		"FROM SERVER: Sent to client the following scene and keys:\n"+sendSceneAndKeysToClient);
+                    
                     //System.out.println(currentScene);
                     
                 } catch (IOException ex) {

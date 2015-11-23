@@ -59,8 +59,10 @@ public class Client {
 
         new Client(hostName, portNumber);
         String clientAdventureChoice = AdventureMain.getAdventureChoiceFromUserInput(AdventureMain.getValidAdventures());
+        
         System.out.println("My adventure choice is: " + clientAdventureChoice);
         output.println(clientAdventureChoice);
+        
         receive();
     }
 
@@ -92,9 +94,10 @@ public class Client {
                 // Gives array of options as strings
                 String[] decisionsFormatted = decisionsWithSemiColons.split(";");
                 
-                System.out.println("From server options: ");
+                //System.out.println("From server options: ");
+                System.out.println("\nChoices are:");
                 for (String decision : decisionsFormatted) {
-                    System.out.println(decision);
+                    System.out.println(decision+"\n");
                     decisionsList.add(decision);
 
                 }
