@@ -68,7 +68,7 @@ public class Client {
         output.println(choice);
     }
 
-    static private void receive() {
+    private static void receive() {
         try {
         
             String inputLine;
