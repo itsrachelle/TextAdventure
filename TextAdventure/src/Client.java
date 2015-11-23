@@ -59,7 +59,8 @@ public class Client {
 
         new Client(hostName, portNumber);
         String clientAdventureChoice = AdventureMain.getAdventureChoiceFromUserInput(AdventureMain.getValidAdventures());
-        output.print(clientAdventureChoice);
+        System.out.println("My adventure choice is: " + clientAdventureChoice);
+        output.println(clientAdventureChoice);
         receive();
     }
 

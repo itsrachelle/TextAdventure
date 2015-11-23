@@ -51,7 +51,7 @@ public class Servers extends Thread {
     public Servers(int port) throws IOException {
 
         this.masterServerSock = new ServerSocket(port);
-        token = new Semaphore(2);
+        token = new Semaphore(1);
 
         /*
          * Trying to figure out implementation to have a list of clients
@@ -236,7 +236,7 @@ public class Servers extends Thread {
             ArrayList<String> currentSceneKeys = adventure.getSceneKeys(currentChoice, currentScene);
 
             sendSceneAndKeysToClient = formatClientKeys(currentSceneKeys);
-            output.print(sendSceneAndKeysToClient);
+            output.println(sendSceneAndKeysToClient);
 
             // the client sending/receiving stuff would have to go here
             while (!currentChoice.contains("Z")) {
@@ -249,7 +249,7 @@ public class Servers extends Thread {
                     currentSceneKeys = adventure.getSceneKeys(currentChoice, currentScene);
                     
                     sendSceneAndKeysToClient = formatClientKeys(currentSceneKeys);
-                    output.print(sendSceneAndKeysToClient);
+                    output.println(sendSceneAndKeysToClient);
                     //System.out.println(currentScene);
                     
                 } catch (IOException ex) {

@@ -151,7 +151,7 @@ public class AdventureMain {
 		StringBuffer buffer = new StringBuffer();
 		
 		//buffer.append("..");
-		buffer.append("src/adventures/");
+		//buffer.append("src//adventures//");
 		buffer.append(fileName);
 		
 		return buffer.toString();
