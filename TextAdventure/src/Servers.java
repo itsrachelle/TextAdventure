@@ -1,24 +1,18 @@
 
+
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.ObjectOutputStream.PutField;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,6 +22,8 @@ public class Servers extends Thread {
     private ArrayList<SubServer> clientList;
     final private ServerSocket masterServerSock;
     final public static int MAX_CLIENTS = 15;
+    public static int num_clients = 0;
+   	private static BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 
     final private SubServer[] subServersForClients = new SubServer[MAX_CLIENTS];
     //public ConcurrentHashMap<Object,Socket> clients;
@@ -50,7 +46,7 @@ public class Servers extends Thread {
     public Servers(int port) throws IOException {
 
         this.masterServerSock = new ServerSocket(port);
-        token = new Semaphore(1);
+        token = new Semaphore(MAX_CLIENTS);
 
         /*
          * Trying to figure out implementation to have a list of clients
@@ -99,69 +95,20 @@ public class Servers extends Thread {
 
             if (currentSubServer == null) {
 
-                currentSubServer = new SubServer(connection, i, token);
+                currentSubServer = new SubServer(connection, i, token, queue);
+                this.subServersForClients[i] = currentSubServer;
 //				/*Trying to figure out implementation to have a list of clients
 //				 * to send them all messages
 //				clients = new ConcurrentHashMap<Object,Socket>();
 //				clients.put(connection.toString(), connection);
-
+                num_clients++;
                 break;
 
             }
         }
     }
-
+  
     public void send(String msg) {
-
-//		for (SubServer client: clientList){
-//			
-//			client.output.write(msg);
-//			System.out.println("Supposed to go through clients");
-//			client.output.println(msg);
-//			client.output.flush();
-//		}
-//		for (int i = 0; i < MAX_CLIENTS; i++) {
-//		// find an unassigned subserver (waiter)
-//					SubServer currentSubServer = this.subServersForClients[i];
-//					
-//					//occupied server! (handling existing client)
-//					if (currentSubServer != null) {
-//
-//						PrintStream outToClient = null;
-//						try{
-//							
-//							outToClient = new PrintStream((lineFromServer));
-//							outToClient.println(msg);
-//						} catch (IOException e){
-//							
-//							System.err.println("Something wrong in sending to all clients");
-//							
-//						}
-        /*
-         * Trying to figure out implementation to have a list of clients
-         * to send them all messages
-         * */
-        //clientList.add(currentSubServer);
-        //break;
-        //
-        //}
-//		}
-//		
-//
-//		Iterator<Object> it = clients.keySet().iterator();
-//
-//		while (it.hasNext()) {
-//			try {
-//
-//				PrintStream output = new PrintStream(clients.get(it.next()).getOutputStream(), true);
-//				System.out.println("Supposed to go through clients");
-//				PrintWriter out = new PrintWriter(clients.get(it.next()).getOutputStream(), true);
-//				out.println(msg);
-//				output.println(msg);
-//			} catch (IOException e) {
-//				System.out.println("ERROR");
-//			}
-//		}
     }
 
     protected class SubServer extends Thread {
@@ -170,13 +117,16 @@ public class Servers extends Thread {
         final private Socket clientConnection;
         private OutputStream output;
         private Semaphore token;
+        private final BlockingQueue<String> queue;
+
         String currentScene = "";
 
         //you can store additional client properties here if you want, for example:
         //private int m_gameRating = 1500;
-        public SubServer(Socket connection, int id, Semaphore semaIn) {
+        public SubServer(Socket connection, int id, Semaphore semaIn, BlockingQueue<String> q) {
             this.clientId = id;
             this.clientConnection = connection;
+            queue = q;
             try {
                 output = clientConnection.getOutputStream();
             } catch (IOException e) {
@@ -191,7 +141,7 @@ public class Servers extends Thread {
         public void run() {
             while (!SubServer.interrupted()) {
 				// process a client request
-
+            	
                 // Using the TextAdventure protocol (to be implemented) 
                 // write all client replies to a file
                 try {
@@ -201,31 +151,48 @@ public class Servers extends Thread {
                     System.err.println("Token interruption");
                     e.printStackTrace();
                 }
-
-                processMessage();
+                
+                try {
+					processMessage();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
                 token.release();
 
             }
+            System.out.println("INTERRUPTED");
         }
 
         //as an example, if you read String messages from your client,
         //just call this method from the run() method to process the client request
-        public void processMessage() {
-
+        public void processMessage() throws InterruptedException {
             PrintWriter output = null;
             BufferedReader input = null;
+            
+            
             try {
                 input = new BufferedReader(new InputStreamReader(clientConnection.getInputStream()));
                 output = new PrintWriter(clientConnection.getOutputStream(), true);
-            } catch (IOException e1) {
+            }catch(SocketException socketException){
+				
+				close();
+				
+			} catch (IOException e1) {
                 System.err.println("A player's connection has been lost!");
+                close();
                 // e.printStackTrace();
             }
             String adventureChoice = "";
             try {
                 adventureChoice = input.readLine();
-            } catch (IOException ex) {
-                Logger.getLogger(Servers.class.getName()).log(Level.SEVERE, null, ex);
+            } catch(SocketException socketException){
+				
+				close();
+				
+			}catch (IOException ex) {
+                Logger.getLogger(Servers.class.getName()).log(Level.SEVERE, "IO Exception", ex);
+                close();
             }
 
             Adventure adventure = new Adventure(adventureChoice);
@@ -242,8 +209,62 @@ public class Servers extends Thread {
 
                 try {
                     //System.out.println(AdventureMain.getChoicesWithFormating(currentSceneKeys));
+                	
+                	String check =null;
+                	try{
+                	if ((check = input.readLine())!=null){
+                		currentChoice = check;
+                	}
+                	}catch(SocketException socketException){
+    					
+    					close();
+    					
+    				}
+                    if(clientId == 0 && check!=null){
 
-                    currentChoice = input.readLine();
+                    	//Thread is the main thread
+                    	int num_clients = Servers.num_clients;
+                    	System.out.println(clientId);
+                    	//String choiceArray[] = new String[num_clients];
+                    	HashMap<String, Integer> choices = new HashMap<String, Integer>();
+                    	int max = 0;
+                    	String win = "A";
+                    	for(int i = 0; i < num_clients-1; ++i){
+                    		String choice = queue.take();
+                    		System.out.println(choice);
+                    		Integer cnt = choices.get(choice);
+                    		if(cnt == null)
+                    			cnt = 0;
+                    		++cnt;
+                    		choices.put(choice, cnt);
+                    		if(cnt > max){
+                    			max = cnt;
+                    			win = choice;
+                    		}else if(cnt == max){
+                    			win = "TIE";
+                    		}
+                    	}
+                    	System.out.println("WIN: "+win);
+                    	if(win.equals("TIE")){
+                    		currentChoice = AdventureGenerator.randomPick(new ArrayList<String>(choices.keySet()));
+                    	}else{
+                    		currentChoice = win;
+                    	}
+                    	//I know this isn't ideal, but it should do for now
+                    	for(int i = 0; i < num_clients-1; ++i){
+                    		queue.add(currentChoice);
+                    	}
+                    	synchronized(queue){
+                    		queue.notifyAll();
+                    	}
+                    }else{
+                    	System.out.println(clientId);
+                    	queue.add(currentChoice);
+                    	synchronized(queue){
+                    		queue.wait();
+                    	}
+                    	currentChoice = queue.take();
+                    }
                     currentScene = adventure.getCurrentScene(currentChoice);
                     currentSceneKeys = adventure.getSceneKeys(currentChoice, currentScene);
                     
@@ -252,8 +273,12 @@ public class Servers extends Thread {
                     //System.out.println(currentScene);
                     
                 } catch (IOException ex) {
-                    Logger.getLogger(Servers.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Servers.class.getName()).log(Level.SEVERE, "IO error", ex);
+                    System.err.println("A player's connection has been lost!...Dropping them");
+                    token.release();
+                    close();
                 }
+
             }
             //No client input to pass
             //Passing null tells the protocol that
